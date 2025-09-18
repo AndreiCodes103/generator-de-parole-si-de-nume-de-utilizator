@@ -1,16 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
+import secrets  # Folosim secrets pentru parole securizate!
 import random
 import string
 
 # --- SETURI DE CARACTERE ---
 
-# Pentru parole (Neschimbat)
 latin_letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 digits = '0123456789'
 symbols = '!@#$%^&*()_=[]{}|;:,.<>?'
-classic_chars = latin_letters + digits + symbols + '-+' 
-complex_chars = classic_chars + 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя' + '的一是不了人我在有他这为之大来以个中上们' + 'ابتثجحخدذرزсشصضطظعغفقكلمنهوي' + '𓀀𓁿𓂀𓃰𓆣𓇋𓋹𓏏𓐍𓂻'
+classic_chars = latin_letters + digits + symbols + '-+'
+complex_chars = (
+    classic_chars
+    + 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+    + '的一是不了人我在有他这为之大来以个中上们'
+    + 'ابتثجحخدذرزсشصضطظعغفقكلمنهوي'
+    + '𓀀𓁿𓂀𓃰𓆣𓇋𓋹𓏏𓐍𓂻'
+)
 
 # Variabile pentru a stoca ultimul rezultat generat (Neschimbat)
 last_fake_name = ""
@@ -18,12 +24,12 @@ last_username = ""
 
 # --- LOGICA PENTRU GENERATOARE ---
 
-# 1. Parole (Neschimbat)
+# 1. Parole (SECURE cu secrets)
 def generate_complex_password(length):
-    return ''.join(random.choice(complex_chars) for _ in range(length))
+    return ''.join(secrets.choice(complex_chars) for _ in range(length))
 
 def generate_classic_password(length):
-    return ''.join(random.choice(classic_chars) for _ in range(length))
+    return ''.join(secrets.choice(classic_chars) for _ in range(length))
 
 def on_generate_password(password_type):
     try:
@@ -43,11 +49,10 @@ def on_generate_password(password_type):
     except ValueError:
         result_var.set("⚠️ Introdu un număr valid.")
 
-# MODIFICARE: Funcție ajutătoare pentru a crea un cuvânt din litere aleatorii
+# Funcție ajutătoare pentru a crea un cuvânt din litere aleatorii (folosește random, nu e sensibil)
 def generate_random_word(min_len, max_len):
     """Generează un singur cuvânt din litere aleatorii, cu o lungime aleatorie."""
     length = random.randint(min_len, max_len)
-    # Folosim doar litere, conform cerinței "ca la parole"
     letters = string.ascii_letters 
     return ''.join(random.choice(letters) for _ in range(length))
 
@@ -55,9 +60,8 @@ def generate_random_word(min_len, max_len):
 def generate_fake_name():
     """Generează două cuvinte aleatorii capitalizate, asigurându-se că nu se repetă."""
     global last_fake_name
-    
+
     while True:
-        # Generează două cuvinte aleatorii și le capitalizează
         prenume = generate_random_word(4, 8).capitalize()
         nume = generate_random_word(5, 10).capitalize()
         new_name = f"{prenume} {nume}"
@@ -73,11 +77,9 @@ def on_generate_name():
 def generate_username():
     """Generează un cuvânt aleatoriu (litere mici) + cifre, asigurându-se că nu se repetă."""
     global last_username
-    
+
     while True:
-        # Generează un cuvânt aleatoriu și îl face minuscul
         word = generate_random_word(6, 10).lower()
-        # Adaugă un număr aleatoriu la final
         number = str(random.randint(10, 9999))
         new_username = f"{word}{number}"
         if new_username != last_username:
@@ -122,12 +124,9 @@ tab4 = ttk.Frame(notebook, padding="10")
 
 notebook.add(tab1, text="🔑 Parolă Clasică")
 notebook.add(tab2, text="🌌 Parolă Avansată")
-notebook.add(tab3, text="👤 Nume Aleatoriu") # Text tab schimbat
-notebook.add(tab4, text="🧑‍💻 Utilizator Aleatoriu") # Text tab schimbat
+notebook.add(tab3, text="👤 Nume Aleatoriu")
+notebook.add(tab4, text="🧑‍💻 Utilizator Aleatoriu")
 
-
-# --- CONȚINUT TAB 1 și 2 (Parole - Neschimbat) ---
-# ... (codul pentru tab-urile 1 și 2 rămâne identic)
 # --- CONȚINUT TAB 1: GENERATOR PAROLĂ CLASICĂ ---
 ttk.Label(tab1, text="Generator de Parole Clasice", style="Title.TLabel").pack(pady=(10, 10))
 ttk.Label(tab1, text="Litere, Cifre, Simboluri, Plus, Minus", wraplength=400, justify="center").pack()
@@ -150,10 +149,8 @@ complex_result_var = tk.StringVar()
 ttk.Label(tab2, textvariable=complex_result_var, wraplength=550, font=("Courier New", 14), foreground="#333", padding=5).pack(pady=5)
 ttk.Button(tab2, text="Copiază parola", command=lambda: copy_to_clipboard(complex_result_var)).pack()
 
-
 # --- CONȚINUT TAB 3: GENERATOR DE NUME ALEATORIU (Modificat) ---
 ttk.Label(tab3, text="Generator de Nume Aleatorii", style="Title.TLabel").pack(pady=(10, 10))
-# MODIFICARE: Textul descriptiv a fost actualizat
 ttk.Label(tab3, text="Generează un nume din două 'cuvinte' aleatorii.", wraplength=400, justify="center").pack(pady=10)
 ttk.Button(tab3, text="Generează nume", command=on_generate_name).pack(pady=20)
 name_result_var = tk.StringVar()
@@ -162,12 +159,10 @@ ttk.Button(tab3, text="Copiază numele", command=lambda: copy_to_clipboard(name_
 
 # --- CONȚINUT TAB 4: GENERATOR DE NUME DE UTILIZATOR (Modificat) ---
 ttk.Label(tab4, text="Generator de Nume de Utilizator", style="Title.TLabel").pack(pady=(10, 10))
-# MODIFICARE: Textul descriptiv a fost actualizat
 ttk.Label(tab4, text="Generează un utilizator aleatoriu ('cuvânt' + cifre).", wraplength=400, justify="center").pack(pady=10)
 ttk.Button(tab4, text="Generează utilizator", command=on_generate_username).pack(pady=20)
 username_result_var = tk.StringVar()
 ttk.Label(tab4, textvariable=username_result_var, font=("Courier New", 18), foreground="#333", padding=5).pack(pady=10)
 ttk.Button(tab4, text="Copiază utilizatorul", command=lambda: copy_to_clipboard(username_result_var)).pack()
-
 
 root.mainloop()
