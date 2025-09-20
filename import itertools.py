@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 import secrets
 import random
 import string
@@ -93,7 +93,6 @@ def generate_dot_trick(email, count):
     variations = set()
     while len(variations) < count:
         temp = list(username)
-        # Generează puncte doar între caracterele username-ului, nu la început sau la sfârșit.
         indices = random.sample(range(1, len(username)), k=random.randint(1, len(username) - 1))
         for i in sorted(indices):
             temp.insert(i, '.')
@@ -159,6 +158,36 @@ def copy_first_email():
         root.clipboard_append(results[0])
         root.update()
 
+def save_notes():
+    text_content = notes_text.get(1.0, tk.END).strip()
+    if not text_content:
+        notes_status.set("⚠️ Nu există text de salvat.")
+        return
+    
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".txt",
+        filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+        title="Salvează notițele"
+    )
+    
+    if file_path:
+        try:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(text_content)
+            notes_status.set("✅ Notițele au fost salvate cu succes!")
+        except Exception as e:
+            notes_status.set(f"⚠️ Eroare la salvare: {e}")
+
+def copy_notes():
+    text_content = notes_text.get(1.0, tk.END).strip()
+    if not text_content:
+        notes_status.set("⚠️ Nu există text de copiat.")
+        return
+    
+    root.clipboard_clear()
+    root.clipboard_append(text_content)
+    notes_status.set("✅ Notițele au fost copiate în clipboard!")
+
 # --- INTERFAȚA GRAFICĂ (GUI) ---
 root = tk.Tk()
 root.title("🛠️ Generator Multifuncțional")
@@ -182,12 +211,14 @@ tab2 = ttk.Frame(notebook, padding="10")
 tab3 = ttk.Frame(notebook, padding="10")
 tab4 = ttk.Frame(notebook, padding="10")
 tab5 = ttk.Frame(notebook, padding="10")
+tab6 = ttk.Frame(notebook, padding="10")
 
 notebook.add(tab1, text="🔑 Parolă Clasică")
 notebook.add(tab2, text="🌌 Parolă Avansată")
 notebook.add(tab3, text="👤 Nume Aleatoriu")
 notebook.add(tab4, text="🧑‍💻 Utilizator Aleatoriu")
 notebook.add(tab5, text="📧 Gmail Trick Generator")
+notebook.add(tab6, text="📝 Notițe")
 
 # --- CONȚINUT TAB 1: GENERATOR PAROLĂ CLASICĂ ---
 ttk.Label(tab1, text="Generator de Parole Clasice", style="Title.TLabel").pack(pady=(10, 10))
@@ -245,15 +276,28 @@ ttk.Radiobutton(tab5, text="Plus Trick", variable=trick_type, value="plus").pack
 ttk.Radiobutton(tab5, text="Combined Trick (Dot + Plus)", variable=trick_type, value="combined").pack()
 
 ttk.Button(tab5, text="Generează variante", command=on_generate_emails).pack(pady=10)
-
-# Am înlocuit Label-ul cu un Text widget pentru a permite copierea selectivă
 gmail_result_text = tk.Text(tab5, height=10, width=50, font=("Courier New", 10), foreground="#333", relief="solid", borderwidth=1)
 gmail_result_text.pack(pady=5)
 
-# Am adăugat un nou buton pentru a copia doar primul email
 button_frame = ttk.Frame(tab5)
 button_frame.pack()
 ttk.Button(button_frame, text="Copiază primul email", command=copy_first_email).pack(side="left", padx=5)
 ttk.Button(button_frame, text="Copiază toate email-urile", command=lambda: root.clipboard_clear() or root.clipboard_append(gmail_result_text.get(1.0, tk.END))).pack(side="left", padx=5)
+
+# --- CONȚINUT TAB 6: NOTIȚE ---
+ttk.Label(tab6, text="Notițe și Documentare", style="Title.TLabel").pack(pady=(10, 10))
+ttk.Label(tab6, text="Poți scrie, lipi sau documenta aici. Salvează în fișier sau copiază în clipboard.", wraplength=400, justify="center").pack(pady=10)
+
+notes_text = tk.Text(tab6, height=15, width=60, font=("Segoe UI", 10), wrap="word", relief="solid", borderwidth=1)
+notes_text.pack(pady=10)
+
+notes_button_frame = ttk.Frame(tab6)
+notes_button_frame.pack()
+
+ttk.Button(notes_button_frame, text="💾 Salvează în Fișier", command=save_notes).pack(side="left", padx=5)
+ttk.Button(notes_button_frame, text="📋 Copiază Textul", command=copy_notes).pack(side="left", padx=5)
+
+notes_status = tk.StringVar()
+ttk.Label(tab6, textvariable=notes_status, font=("Segoe UI", 10), foreground="green").pack(pady=10)
 
 root.mainloop()
